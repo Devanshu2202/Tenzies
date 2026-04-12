@@ -1,13 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import "./App.css";
+import Die from "./components/Die";
+import Confetti from "react-confetti";
 
 function App() {
   const [dice, setDice] = useState(generateDice());
   const [tenzies, setTenzies] = useState(false);
 
+  console.log("dice", dice);
+  console.log("tenzies", tenzies);
+
   function generateDice() {
     const numbers = [];
 
+    console.log("numbers", numbers);
     for (let i = 0; i < 10; i++) {
       numbers.push({
         id: i,
@@ -15,85 +21,71 @@ function App() {
         isHeld: false,
       });
     }
-
     return numbers;
   }
 
   function rollDice() {
-    if (!tenzies) {
-      setDice((prevDice) =>
-        prevDice.map((die) =>
-          die.isHeld
-            ? die
-            : { ...die, value: Math.floor(Math.random() * 6) + 1 },
-        ),
-      );
-    } else {
-      setTenzies(false);
-      setDice(generateDice());
-    }
-  }
-
-  function holdDice(id) {
-    setDice((prevItem) =>
-      prevItem.map((item) =>
-        item.id === id ? { ...item, isHeld: !item.isHeld } : item,
+    setDice((prev) =>
+      prev.map((die) =>
+        die.isHeld ? die : { ...die, value: Math.floor(Math.random() * 6) + 1 },
       ),
     );
   }
 
-  // ✅ Win condition
-  // useEffect(() => {
-  if (dice.length === 0) return;
+  function holdDice(id) {
+    setDice((prev) =>
+      prev.map((die) =>
+        die.id === id ? { ...die, isHeld: !die.isHeld } : die,
+      ),
+    );
+  }
+
+  function newGame() {
+    setDice(generateDice());
+    setTenzies(false);
+  }
+
+  const diceElement = dice.map((die) => (
+    <Die
+      key={die.id}
+      value={die.value}
+      isHeld={die.isHeld}
+      holdDice={() => holdDice(die.id)}
+    />
+  ));
 
   const allHeld = dice.every((die) => die.isHeld);
-  const allSameValue = dice.every((die) => die.value === dice[0].value);
+  const firstValue = dice[0].value;
+  const allSameValue = dice.every((die) => die.value === firstValue);
 
-  if (allHeld && allSameValue) {
+  if (allHeld && allSameValue && !tenzies) {
     setTenzies(true);
   }
-  // }, [dice]);
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-blue-950">
-      <main className="bg-white rounded shadow-lg p-10 text-center">
-        <h1 className="text-3xl font-bold mb-2">Tenzies</h1>
+    <>
+      {tenzies && (
+        <Confetti width={window.innerWidth} height={window.innerHeight} />
+      )}
 
-        <p className="text-gray-600 text-sm mb-6">
-          Roll until all dice are the same. Click each die to freeze it at its
-          current value between rolls.
-        </p>
+      <div className="flex items-center justify-center min-h-screen bg-[#0B2434]">
+        <div className="bg-white p-8 rounded-xl text-center">
+          <h1 className="text-2xl font-bold mb-2">Tenzies</h1>
 
-        {/* Dice Grid */}
-        <div className="grid grid-cols-5 gap-4 mb-6">
-          {dice.map((die) => (
-            <button
-              key={die.id}
-              onClick={() => holdDice(die.id)}
-              className={`w-12 h-12 flex items-center justify-center rounded-xl font-bold m-auto ${
-                die.isHeld ? "bg-green-300" : "bg-gray-200"
-              }`}
-            >
-              {die.value}
-            </button>
-          ))}
+          {tenzies && (
+            <h2 className="text-green-600 font-bold mb-4">🎉 You Won!</h2>
+          )}
+          <div className="grid grid-cols-5 gap-4 mb-6">{diceElement}</div>
+
+          <button
+            onClick={tenzies ? newGame : rollDice}
+            className="bg-indigo-600 text-white px-6 py-2 rounded-lg shadow-md hover:bg-indigo-700"
+          >
+            {tenzies ? "New Game" : "Roll Dice"}
+          </button>
         </div>
-
-        <button
-          onClick={rollDice}
-          className="bg-purple-600 text-white px-6 py-2 rounded-lg shadow"
-        >
-          {tenzies ? "New Game" : "Roll"}
-        </button>
-
-        {/* Win Message */}
-        {tenzies && (
-          <p className="mt-4 text-green-600 font-bold">
-            🎉 Congratulations! You won!
-          </p>
-        )}
-      </main>
-    </div>
+      </div>
+    </>
   );
 }
 
