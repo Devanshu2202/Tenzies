@@ -7,13 +7,9 @@ function App() {
   const [dice, setDice] = useState(generateDice());
   const [tenzies, setTenzies] = useState(false);
 
-  console.log("dice", dice);
-  console.log("tenzies", tenzies);
-
   function generateDice() {
     const numbers = [];
 
-    console.log("numbers", numbers);
     for (let i = 0; i < 10; i++) {
       numbers.push({
         id: i,
