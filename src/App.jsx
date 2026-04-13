@@ -2,10 +2,12 @@ import { useState } from "react";
 import "./App.css";
 import Die from "./components/Die";
 import Confetti from "react-confetti";
+import { useWindowSize } from "react-use";
 
 function App() {
   const [dice, setDice] = useState(generateDice());
   const [tenzies, setTenzies] = useState(false);
+  const { width, height } = useWindowSize();
 
   function generateDice() {
     const numbers = [];
@@ -60,11 +62,9 @@ function App() {
 
   return (
     <>
-      {tenzies && (
-        <Confetti width={window.innerWidth} height={window.innerHeight} />
-      )}
+      {tenzies && <Confetti width={width} height={height} />}
 
-      <div className="flex items-center justify-center min-h-screen bg-[#0B2434]">
+      <div className="flex items-center justify-center h-screen bg-[#0B2434]">
         <div className="bg-white p-8 rounded-xl text-center">
           <h1 className="text-2xl font-bold mb-2">Tenzies</h1>
 
